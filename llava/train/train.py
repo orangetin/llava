@@ -796,6 +796,9 @@ def train():
             model = LlavaMixtralForCausalLM.from_pretrained(
                 model_args.model_name_or_path,
                 cache_dir=training_args.cache_dir,
+                torch_dtype=compute_dtype,
+                trust_remote_code=True,
+                attn_implementation="flash_attention_2",
                 **bnb_model_from_pretrained_args
             )
         else:
