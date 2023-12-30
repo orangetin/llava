@@ -42,7 +42,7 @@ class LlavaMixtralForCausalLM(MixtralForCausalLM, LlavaMetaForCausalLM):
 
     def __init__(self, config):
         super().__init__(config)
-        self.model = MixtralModel(config)
+        self.model = LlavaMixtralModel(config)
         self.vocab_size = config.vocab_size
         self.lm_head = nn.Linear(config.hidden_size, config.vocab_size, bias=False)
         self.router_aux_loss_coef = config.router_aux_loss_coef
