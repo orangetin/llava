@@ -9,10 +9,19 @@ from transformers.trainer import (
     get_parameter_names,
     has_length,
     ALL_LAYERNORM_LAYERS,
-    ShardedDDPOption,
     logger,
 )
+from transformers.utils import ExplicitEnum
+
 from typing import List, Optional
+
+
+class ShardedDDPOption(ExplicitEnum):
+    SIMPLE = "simple"
+    ZERO_DP_2 = "zero_dp_2"
+    ZERO_DP_3 = "zero_dp_3"
+    OFFLOAD = "offload"
+    AUTO_WRAP = "auto_wrap"
 
 
 def maybe_zero_3(param, ignore_status=False, name=None):
