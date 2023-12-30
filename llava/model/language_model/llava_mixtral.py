@@ -27,7 +27,7 @@ from ..llava_arch import LlavaMetaModel, LlavaMetaForCausalLM
 
 
 class LlavaConfig(MixtralConfig):
-    model_type = "llava"
+    model_type = "llava_mixtral"
 
 
 class LlavaMixtralModel(LlavaMetaModel, MixtralModel):
@@ -111,5 +111,5 @@ class LlavaMixtralForCausalLM(MixtralForCausalLM, LlavaMetaForCausalLM):
             _inputs['images'] = images
         return _inputs
 
-AutoConfig.register("llava", LlavaConfig)
+AutoConfig.register("llava_mixtral", LlavaConfig)
 AutoModelForCausalLM.register(LlavaConfig, LlavaMixtralForCausalLM)

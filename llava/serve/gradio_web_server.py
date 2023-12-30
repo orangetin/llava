@@ -177,6 +177,8 @@ def http_bot(state, model_selector, temperature, top_p, max_new_tokens, request:
                     template_name = "llava_v1"
             elif "mpt" in model_name.lower():
                 template_name = "mpt"
+            elif "mixtral" in model_name.lower():
+                template_name = "llava_llama_2"
             else:
                 if 'mmtag' in model_name.lower():
                     template_name = "v0_mmtag"
