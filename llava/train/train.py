@@ -889,6 +889,7 @@ def train():
         
         vision_tower = model.get_vision_tower()
         vision_tower.to(dtype=torch.bfloat16, device=training_args.device)
+        model.model.vision_tower = [vision_tower]
 
         data_args.image_processor = vision_tower.image_processor
         data_args.is_multimodal = True
