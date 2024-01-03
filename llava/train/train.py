@@ -154,9 +154,12 @@ def get_peft_state_non_lora_maybe_zero_3(named_params, require_grad_only=True):
     return to_return
 
 
-def get_mm_adapter_state_maybe_zero_3(named_params, keys_to_match):
+def get_mm_adapter_state_maybe_zero_3(trainer: transformers.Trainer, named_params, keys_to_match):
     to_return = {k: t for k, t in named_params if any(key_match in k for key_match in keys_to_match)}
-    to_return = {k: maybe_zero_3(v, ignore_status=True).cpu() for k, v in to_return.items()}
+    if trainer.is_deepspeed_enabled:
+        to_return = {k: maybe_zero_3(v, ignore_status=True).cpu() for k, v in to_return.items()}
+    else:
+        to_return = {k: v.detach().cpu().clone() for k, v in to_return.items()}
     return to_return
 
 
@@ -180,13 +183,16 @@ def safe_save_model_for_hf_trainer(trainer: transformers.Trainer,
                                    output_dir: str):
     """Collects the state dict and dump to disk."""
 
+    if trainer.is_fsdp_enabled:
+        trainer.accelerator.state.fsdp_plugin.set_state_dict_type("FULL_STATE_DICT")
+
     if getattr(trainer.args, "tune_mm_mlp_adapter", False):
         # Only save Adapter
         keys_to_match = ['mm_projector']
         if getattr(trainer.args, "use_im_start_end", False):
             keys_to_match.extend(['embed_tokens', 'embed_in'])
 
-        weight_to_save = get_mm_adapter_state_maybe_zero_3(trainer.model.named_parameters(), keys_to_match)
+        weight_to_save = get_mm_adapter_state_maybe_zero_3(trainer, trainer.model.named_parameters(), keys_to_match)
         trainer.model.config.save_pretrained(output_dir)
 
         current_folder = output_dir.split('/')[-1]
@@ -200,7 +206,7 @@ def safe_save_model_for_hf_trainer(trainer: transformers.Trainer,
                 torch.save(weight_to_save, os.path.join(output_dir, f'mm_projector.bin'))
         return
 
-    if trainer.deepspeed:
+    if trainer.deepspeed or trainer.is_fsdp_enabled:
         torch.cuda.synchronize()
         trainer.save_model(output_dir)
         return
