@@ -192,7 +192,8 @@ def safe_save_model_for_hf_trainer(trainer: transformers.Trainer,
         if getattr(trainer.args, "use_im_start_end", False):
             keys_to_match.extend(['embed_tokens', 'embed_in'])
 
-        weight_to_save = get_mm_adapter_state_maybe_zero_3(trainer, trainer.model.named_parameters(), keys_to_match)
+        named_parameters = dict(trainer.model.state_dict())
+        weight_to_save = get_mm_adapter_state_maybe_zero_3(trainer, named_parameters.items(), keys_to_match)
         trainer.model.config.save_pretrained(output_dir)
 
         current_folder = output_dir.split('/')[-1]
